@@ -1,64 +1,71 @@
 name: Deploy Dist
 on:
   push:
-      branches:
-          - main
-          - 'feature/**'
-      paths-ignore:
-          - '.github/workflows/*'
-          - README.md
+    branches:
+      - main
+      - 'feature/**'
+    paths-ignore:
+      - '.github/workflows/*'
+      - README.md
   workflow_dispatch:
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-           - name: Get code
-             uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
 
-           - name: Install Node.js 20
-             uses: actions/setup-node@v4
-             with:
-               node-version: 20
-           - name: Install dependencies
-             run: npm ci
-           - name: run test
-             run: npm run test
-    build:
-        needs: test
-        runs-on: ubuntu:latest
-        steps:
-           - name: Get Code
-             uses: actions/checkout@v4
-           - name: Install Node.js 20
-             uses: actions/setup-node@v4
-             with:
-                node-version: 20
-           - name: cache dependencies
-             uses: action/cache@v4
-             with:
-               path: ~/.npm
-               key: ${{ runner.os }}--node-${{ hashfiles('**/package-lock.json') }}
+      - name: Install Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-           - name: Install dependencies
-             run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-           - name: Build Project
-             run: npm run build
-           - name: Upload Artifact
-             uses: actions/upload-artifact@v4
-             with: 
-                name: dist-files
-                path: dist
+      - name: Run tests
+        run: npm run test
 
-     deploy:
-        needs: build
-       runs-on: ubuntu-latest
-       steps:
-           - name: download dist artificat 
-             uses: actions/download-artifact@v4
-             with:
-                name: dist-files
-                path: dist
-           - name: Deploy
-             run: echo "deploy successfull"
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-files
+          path: dist
+
+      - name: Deploy
+        run: echo "deploy successful"
