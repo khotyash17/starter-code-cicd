@@ -3,7 +3,7 @@ on: push
 jobs:
     greet:
       runs-on: ubuntu-latest
-        steps:
-            - name: "greet user"
-              runs:  echo "Hello World"
+      steps:
+          - name: "greet user"
+            runs:  echo "Hello World"
 
