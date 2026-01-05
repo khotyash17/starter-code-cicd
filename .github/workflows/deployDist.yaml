@@ -14,7 +14,7 @@ jobs:
           - name: Install node 20
             uses: actions/setup-node@v4
             with:
-              node-version: 21
+              node-version: 25
 	  - name: print node version
             run: node -v
 	  - name: Install Dependencies 
